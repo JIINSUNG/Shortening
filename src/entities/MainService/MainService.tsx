@@ -1,9 +1,12 @@
+"use client"
+
 import React, { useEffect, useState } from "react";
 import styles from "./MainService.module.css";
 const MainService = () => {
   const [originalUrl, setOriginalUrl] = useState<string>("");
   const [shortenedUrl, setShortenedUrl] = useState<string>("");
   const [trigger, setTrigger] = useState<boolean>(false);
+  const [isMaking, setIsMaking] = useState<boolean>(false);
 
   useEffect(() => {
     setOriginalUrl("");
@@ -15,8 +18,10 @@ const MainService = () => {
       alert("URL을 입력해 주세요");
       return;
     }
+    setIsMaking(true);
 
-    await fetch(`/url`, {
+
+    await fetch(`/api/url`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -31,7 +36,9 @@ const MainService = () => {
       .then((body) => {
         setShortenedUrl(body.data.short_url);
       })
-      .catch((err) => console.log(err));
+      .catch((err) => alert(err.message));
+
+    setIsMaking(false);
   };
 
   const handleCopy = () => {
@@ -68,41 +75,43 @@ const MainService = () => {
             줄이기
           </button>
         </div>
-        {shortenedUrl ? (
-          <div>
-            <p>
-              생성된 URL: {window.location.href}
-              {shortenedUrl}
-            </p>
-            <div className={styles.helper}>
-              <button
-                type="button"
-                onClick={() => {
-                  setTrigger((prev) => !prev);
-                }}
-                className={styles.button}
-              >
-                다시 만들기
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  handleCopy();
-                }}
-                className={styles.button}
-              >
-                URL 복사
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div>
-            <p>
-              입력창에 URL을 입력하신 후 줄이기 버튼을 눌러주세요, 변환이
-              완료되면 변환된 URL이 표시됩니다.
-            </p>
-          </div>
-        )}
+        {
+          isMaking ? <div><p>URL 생성중입니다.</p></div> : shortenedUrl ? (
+              <div>
+                <p>
+                  생성된 URL: {window.location.href}
+                  {shortenedUrl}
+                </p>
+                <div className={styles.helper}>
+                  <button
+                      type="button"
+                      onClick={() => {
+                        setTrigger((prev) => !prev);
+                      }}
+                      className={styles.button}
+                  >
+                    다시 만들기
+                  </button>
+                  <button
+                      type="button"
+                      onClick={() => {
+                        handleCopy();
+                      }}
+                      className={styles.button}
+                  >
+                    URL 복사
+                  </button>
+                </div>
+              </div>
+          ) : (
+              <div>
+                <p>
+                  입력창에 URL을 입력하신 후 줄이기 버튼을 눌러주세요, 변환이
+                  완료되면 변환된 URL이 표시됩니다.
+                </p>
+              </div>
+          )
+        }
       </div>
     </div>
   );
